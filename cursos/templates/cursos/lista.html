@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Oferta Académica - Cursos</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" defer></script>
+</head>
+
+<body class="container mt-4">
+
+    <!-- Paso 5: Barra de Navegación Condicional en Plantillas -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Catálogo de Cursos</h1>
+        <div>
+            <a href="{% url 'web_lista_profesores' %}" class="btn btn-outline-secondary btn-sm me-2">Ver Profesores</a>
+            {% if user.is_authenticated %}
+                <span class="me-2 text-dark font-weight-bold">Hola, <strong>{{ user.username }}</strong></span>
+                <a href="{% url 'web_crear_curso' %}" class="btn btn-success btn-sm me-2">+ Nuevo Curso</a>
+                <form action="{% url 'logout' %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-danger btn-sm">Cerrar Sesión</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-primary btn-sm">Iniciar Sesión</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- BLOQUE DE MENSAJES FLASH DE RETROALIMENTACIÓN (Agregado Paso 3) -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <p class="text-muted">
+        Total de cursos disponibles: {{ paginator.count }}
+    </p>
+
+    <!-- TARJETAS DEL CATÁLOGO DE CURSOS -->
+    <div class="row">
+        {% for curso in cursos %}
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+
+                    <h5 class="card-title">{{ curso.nombre }}</h5>
+
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Código: {{ curso.codigo }}
+                    </h6>
+
+                    <p class="card-text">
+                        <strong>Profesor:</strong>
+                        {{ curso.profesor.nombre|upper }}
+                    </p>
+
+                    <p class="card-text">
+                        <strong>Alumnos inscritos:</strong>
+                        {{ curso.estudiantes.count }}
+                    </p>
+
+                    <div class="d-flex justify-content-between mt-3">
+                        <!-- Botón para ver el detalle -->
+                        <a href="{% url 'web_detalle_curso' curso.pk %}" class="btn btn-primary btn-sm">
+                            Ver Detalle
+                        </a>
+
+                        <!-- Ocultar Acciones Administrativas (Ejercicio para el Alumno) -->
+                        {% if user.is_authenticated %}
+                            <div>
+                                <a href="{% url 'web_editar_curso' curso.pk %}" class="btn btn-warning btn-sm">
+                                    Editar
+                                </a>
+                                <a href="{% url 'web_eliminar_curso' curso.pk %}" class="btn btn-danger btn-sm">
+                                    Eliminar
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="alert alert-warning">
+            No hay cursos registrados en el sistema.
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- COMPONENTE DE PAGINACIÓN BOOTSTRAP (Agregado Paso 3) -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+                </li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</body>
+</html>
