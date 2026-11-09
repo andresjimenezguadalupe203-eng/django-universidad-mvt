@@ -1,0 +1,109 @@
+{% extends 'cursos/lista.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- BARRA DE NAVEGACIÓN -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 rounded px-3 shadow-sm">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Sistema Académico</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="{% url 'web_lista_cursos' %}">Cursos</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="{% url 'web_lista_estudiantes' %}">Estudiantes</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ALERTAS FLASH -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="text-secondary fw-bold">Listado de Estudiantes</h2>
+        <a href="{% url 'web_crear_estudiante' %}" class="btn btn-primary shadow-sm">+ Registrar Estudiante</a>
+    </div>
+
+    <!-- FORMULARIO DE BÚSQUEDA GET CON BOTÓN LIMPIAR INTEGRADO -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-8">
+            <input type="text" name="q" class="form-control" placeholder="Buscar por nombre, apellido o matrícula..." value="{{ query }}">
+        </div>
+        <div class="col-md-4 d-flex gap-2">
+            <button type="submit" class="btn btn-primary w-100">Buscar</button>
+            <a href="{% url 'web_lista_estudiantes' %}" class="btn btn-outline-secondary w-100">Limpiar</a>
+        </div>
+    </form>
+
+    <!-- TABLA EN ESTILO BOOTSTRAP COMPLETO -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-3">Matrícula</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th class="text-center pe-3">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for estudiante in estudiantes %}
+                    <tr>
+                        <td class="ps-3 fw-bold text-muted">{{ estudiante.matricula }}</td>
+                        <td>{{ estudiante.nombre }}</td>
+                        <td>{{ estudiante.email }}</td>
+                        <td class="text-center pe-3">
+                            <a href="{% url 'web_detalle_estudiante' estudiante.pk %}" class="btn btn-sm btn-info text-white shadow-sm me-1">Ver Detalle</a>
+                            <a href="{% url 'web_editar_estudiante' estudiante.pk %}" class="btn btn-sm btn-warning shadow-sm me-1">Editar</a>
+                            <a href="{% url 'web_eliminar_estudiante' estudiante.pk %}" class="btn btn-sm btn-danger shadow-sm">Eliminar</a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <!-- MENSAJE EMPTY ADAPTADO A LA BÚSQUEDA -->
+                        <td colspan="4" class="text-center text-muted py-4">
+                            {% if query %}
+                                No se encontraron estudiantes que coincidan con la búsqueda "{{ query }}".
+                            {% else %}
+                                No hay estudiantes registrados.
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+    <!-- COMPONENTE DE PAGINACIÓN ADAPTADO CON PARÁMETRO DE BÚSQUEDA -->
+    {% if is_paginated %}
+    <nav class="mt-4">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <!-- SE AGREGA &q={{ query }} AL ENLACE -->
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}">Anterior</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+            {% endif %}
+            
+            <li class="page-item active"><span class="page-link">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span></li>
+            
+            {% if page_obj.has_next %}
+                <!-- SE AGREGA &q={{ query }} AL ENLACE -->
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}">Siguiente</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Siguiente</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %} 
+    
+{% endblock %}

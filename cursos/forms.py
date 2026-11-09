@@ -1,6 +1,5 @@
 from django import forms
-from .models import Curso
-
+from .models import Curso, Estudiante  # Importamos ambos modelos aquí
 
 class CursoForm(forms.ModelForm):
     class Meta:
@@ -43,3 +42,14 @@ class CursoForm(forms.ModelForm):
             )
 
         return codigo
+
+class EstudianteForm(forms.ModelForm):
+    class Meta:
+        model = Estudiante
+        # Quitamos 'apellido' para que no marque error con tu modelo
+        fields = ['nombre', 'email', 'matricula']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'matricula': forms.TextInput(attrs={'class': 'form-control'}),
+        }
